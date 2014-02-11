@@ -27,13 +27,10 @@ def normalizeAnswers(predictionArray, startCol, endCol, sumToCol=None):
     """Normalize the values between start and end to sumToCol"""
     
     sums = predictionArray[:,startCol:endCol].sum(axis=1) + numpy.finfo(predictionArray.dtype).eps
-    #print "First 3 sums: {}".format(sums[:3])
     predictionArray[:,startCol:endCol] /= numpy.tile(sums, (endCol-startCol, 1)).transpose()
     
     if sumToCol:
-        #print "First 3 target sums: {}".format(predictionArray[:3,sumToCol])
         predictionArray[:,startCol:endCol] *= numpy.tile(predictionArray[:,sumToCol], (endCol-startCol, 1)).transpose()
-        #print "After: {}".format(predictionArray[:3,startCol:endCol].sum(axis=1))
 
 def normalizePredictions(predictions):
     
@@ -162,26 +159,6 @@ def experimentLinearRegression(trainingInputs, trainingOutputs, validationInputs
     print "\tTraining: {}".format(rms(forceNonneg(regr.predict(trainingInputs)).ravel(), trainingOutputs.ravel()))
     print "\tValidation: {}".format(rms(forceNonneg(regr.predict(validationInputs)).ravel(), validationOutputs.ravel()))
 
-    #print "\nRegularized linear regression (with outputs forced to non-negative then normalized)"
-    #print "\tTraining: {}".format(rms(normalizePredictions(forceNonneg(regr.predict(trainingInputs))).ravel(), trainingOutputs.ravel()))
-    #print "\tValidation: {}".format(rms(normalizePredictions(forceNonneg(regr.predict(validationInputs))).ravel(), validationOutputs.ravel()))
-    #
-    ## try mean/stddev normalization
-    #rowMin, rowMax = computeRowMinMax(trainingInputs)
-    #scaledTrainingInputs = scale(trainingInputs, rowMin, rowMax)
-    #
-    #rowMin, rowMax = computeRowMinMax(validationInputs)
-    #scaledValidationInputs = scale(validationInputs, rowMin, rowMax)
-    #
-    ## try a few different regularization params
-    #for lambder in (10, 20, 40, 80, 160):
-    #    scaledRegression = linear_model.Ridge(alpha=lambder)
-    #    scaledRegression.fit(scaledTrainingInputs, trainingOutputs)
-    #    print "\nRegularized linear regression (with feature scaling, lambda={})".format(lambder)
-    #    print "\tTraining: {}".format(rms(forceNonneg(scaledRegression.predict(scaledTrainingInputs)).ravel(), trainingOutputs.ravel()))
-    #    print "\tValidation: {}".format(rms(forceNonneg(scaledRegression.predict(scaledValidationInputs)).ravel(), validationOutputs.ravel()))
-
-
 def runTests(filename, pcaFile=None):
     print "TRAINING/TESTING {}".format(filename)
     
@@ -210,11 +187,6 @@ def runTests(filename, pcaFile=None):
 
     experimentLinearRegression(trainingInputs, trainingOutputs, validationInputs, validationOutputs)
 
-#    print "\nSVM regression"
-#    regr = svm.SVR()
-#    regr.fit(trainingInputs, trainingOutputs[:,0])
-#    print "\tTraining: {}".format(rms(regr.predict(trainingInputs).ravel(), trainingOutputs.ravel()))
-#    print "\tValidation: {}".format(rms(regr.predict(validationInputs).ravel(), validationOutputs.ravel()))
  
     #experimentRandomForest(trainingInputs, trainingOutputs, validationInputs, validationOutputs, 20, 5)
     #experimentRandomForest(trainingInputs, trainingOutputs, validationInputs, validationOutputs, 20, 5, maxFeatures="auto")
@@ -228,11 +200,6 @@ def runTests(filename, pcaFile=None):
     #    experimentRandomForest(trainingInputs, trainingOutputs, validationInputs, validationOutputs, numTrees, None, maxFeatures=int(numFeatures * 0.5), minSplit=5)
     
     experimentRandomForest(trainingInputs, trainingOutputs, validationInputs, validationOutputs, 40, None, maxFeatures=int(numFeatures * 0.5), minSplit=20, saveAsPath="randomForest-40t-0.5f-20mss.pickle")
-
-    #experimentRandomForest(trainingInputs, trainingOutputs, validationInputs, validationOutputs, 20, None, maxFeatures=int(numFeatures * 0.25))
-    
-    #experimentRandomForest(trainingInputs, trainingOutputs, validationInputs, validationOutputs, 40, None, maxFeatures="auto")
-    #experimentRandomForest(trainingInputs, trainingOutputs, validationInputs, validationOutputs, 20, None, maxFeatures="auto", minSplit=5)
 
 def experimentRandomForest(trainingInputs, trainingOutputs, validationInputs, validationOutputs, numTrees, maxDepth, maxFeatures="sqrt", minSplit=20, saveAsPath=None):
     print "\nRandom Forests: {} trees, max depth {}, max features {}, min samples split {}".format(numTrees, maxDepth, maxFeatures, minSplit)
