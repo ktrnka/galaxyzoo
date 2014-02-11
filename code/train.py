@@ -10,6 +10,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn import svm
 from sklearn.preprocessing import StandardScaler
 import pickle
+import filehandlers
 
 def parseArgs():
     parser = argparse.ArgumentParser()
@@ -182,9 +183,14 @@ def experimentLinearRegression(trainingInputs, trainingOutputs, validationInputs
 
 
 def runTests(filename, pcaFile=None):
-    print "TESTING {}".format(filename)
+    print "TRAINING/TESTING {}".format(filename)
     
-    trainingInputs, trainingOutputs, validationInputs, validationOutputs = loadSets(filename, pcaFile)
+    trainingInputs, trainingOutputs, validationInputs, validationOutputs = filehandlers.loadTrainingSets(filename)
+    if pcaFile:
+        pca = filehandlers.loadPca(pcaFile)
+        trainingInputs = pca.transform(trainingInputs)
+        validationInputs = pca.transform(validationInputs)
+
     numExamples = trainingInputs.shape[0]
     numFeatures = trainingInputs.shape[1]
     print "Loaded training data with shape {} and {}".format(trainingInputs.shape, trainingOutputs.shape)
